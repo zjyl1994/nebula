@@ -1,6 +1,7 @@
 package startup
 
 import (
+	"os"
 	"strconv"
 
 	"example.com/template/infra/util"
@@ -15,13 +16,13 @@ import (
 )
 
 func Startup() (err error) {
-	vars.LISTEN_ADDR = util.Getenv(vars.ENV_LISTEN_ADDR, vars.DEFAULT_LISTEN)
-	vars.DEBUG_MODE, _ = strconv.ParseBool(util.Getenv(vars.ENV_DEBUG_MODE, "false"))
+	vars.LISTEN_ADDR = util.COALESCE(os.Getenv(vars.ENV_LISTEN_ADDR), vars.DEFAULT_LISTEN)
+	vars.DEBUG_MODE, _ = strconv.ParseBool(os.Getenv(vars.ENV_DEBUG_MODE))
 	if vars.DEBUG_MODE {
 		logrus.SetLevel(logrus.DebugLevel)
 		logrus.Debugln("Debug mode enabled")
 	}
-	
+
 	databaseFile := strcase.ToSnake(vars.APP_NAME) + ".db"
 	logrus.Debugln("Database file:", databaseFile)
 	vars.DB, err = gorm.Open(sqlite.Open(databaseFile), &gorm.Config{

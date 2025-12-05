@@ -1,13 +1,11 @@
 package util
 
-import (
-	"os"
-)
-
-func Getenv(key string, defaultValue string) string {
-	value := os.Getenv(key)
-	if value != "" {
-		return value
+func COALESCE[T comparable](v ...T) T {
+	var defaultValue T
+	for _, val := range v {
+		if val != defaultValue {
+			return val
+		}
 	}
 	return defaultValue
 }
