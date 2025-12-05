@@ -22,9 +22,12 @@ func Run(listen string) error {
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 		ServerHeader:          appName,
+		AppName:               appName,
 	})
+
 	RegisterRoutes(app)
 
+	// Remove if not using SPA //
 	app.Use("/", compress.New(compress.Config{
 		Level: compress.LevelDefault,
 	}), filesystem.New(filesystem.Config{
@@ -32,6 +35,7 @@ func Run(listen string) error {
 		PathPrefix:   "dist",
 		NotFoundFile: "dist/index.html",
 	}))
+	/////////////////////////////
 
 	srvErr := make(chan error, 1)
 	go func() {
