@@ -16,8 +16,9 @@ import (
 )
 
 func Startup() (err error) {
-	vars.LISTEN_ADDR = util.COALESCE(os.Getenv(vars.ENV_LISTEN_ADDR), vars.DEFAULT_LISTEN)
-	vars.DEBUG_MODE, _ = strconv.ParseBool(os.Getenv(vars.ENV_DEBUG_MODE))
+	envPrefix := strcase.ToSnake(vars.APP_NAME)
+	vars.LISTEN_ADDR = util.COALESCE(os.Getenv(envPrefix+"_LISTEN"), vars.DEFAULT_LISTEN)
+	vars.DEBUG_MODE, _ = strconv.ParseBool(os.Getenv(envPrefix + "_DEBUG"))
 	if vars.DEBUG_MODE {
 		logrus.SetLevel(logrus.DebugLevel)
 		logrus.Debugln("Debug mode enabled")
