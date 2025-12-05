@@ -1,0 +1,9 @@
+package vars
+
+const (
+	DEFAULT_LISTEN = ":8000"
+	APP_NAME       = "APP_NAME_PLACEHOLDER"
+
+	ENV_LISTEN_ADDR = APP_NAME + "_LISTEN"
+	ENV_DEBUG_MODE  = APP_NAME + "_DEBUG"
+)
