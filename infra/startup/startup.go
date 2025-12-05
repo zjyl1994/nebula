@@ -16,7 +16,7 @@ import (
 )
 
 func Startup() (err error) {
-	envPrefix := strcase.ToSnake(vars.APP_NAME)
+	envPrefix := strcase.ToScreamingSnake(vars.APP_NAME)
 	vars.LISTEN_ADDR = util.COALESCE(os.Getenv(envPrefix+"_LISTEN"), vars.DEFAULT_LISTEN)
 	vars.DEBUG_MODE, _ = strconv.ParseBool(os.Getenv(envPrefix + "_DEBUG"))
 	if vars.DEBUG_MODE {
