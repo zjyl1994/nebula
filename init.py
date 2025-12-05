@@ -3,6 +3,7 @@ import subprocess
 import pathlib
 import sys
 import re
+import shutil
 
 def repo_root():
     try:
@@ -22,6 +23,41 @@ def replace_in_file(p: pathlib.Path, placeholder: str, value: str) -> None:
     if placeholder in s:
         p.write_text(s.replace(placeholder, value), encoding="utf-8")
 
+def get_module_path() -> str | None:
+    try:
+        p = subprocess.run(["git", "remote", "get-url", "origin"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        url = p.stdout.strip()
+    except Exception:
+        return None
+    m = re.match(r"git@([^:]+):/*([^/]+/[^/]+?)(?:\.git)?$", url)
+    if m:
+        host, path = m.group(1), m.group(2)
+        return f"{host}/{path}"
+    m = re.match(r"https?://([^/]+)/(.+?)(?:\.git)?$", url)
+    if m:
+        host, path = m.group(1), m.group(2)
+        return f"{host}/{path}"
+    return None
+
+def replace_go_imports(root: pathlib.Path, old: str, new: str) -> None:
+    for p in root.rglob("*.go"):
+        s = p.read_text(encoding="utf-8")
+        if old in s:
+            p.write_text(s.replace(old, new), encoding="utf-8")
+
+def update_go_mod(root: pathlib.Path, module: str) -> None:
+    p = root / "go.mod"
+    if not p.exists():
+        return
+    s = p.read_text(encoding="utf-8")
+    s = re.sub(r"^module\s+\S+", f"module {module}", s, count=1, flags=re.MULTILINE)
+    p.write_text(s, encoding="utf-8")
+    if shutil.which("go"):
+        try:
+            subprocess.run(["go", "mod", "tidy"], check=True, cwd=str(root))
+        except Exception:
+            pass
+
 def main():
     root = repo_root()
     repo_name = root.name
@@ -32,6 +68,11 @@ def main():
             replace_in_file(p, "APP_NAME_PLACEHOLDER", app_name)
         else:
             print(f"missing {p}", file=sys.stderr)
+    mod = get_module_path()
+    if mod:
+        replace_go_imports(root, "example.com/template", mod)
+        update_go_mod(root, mod)
+        print(mod)
     print(app_name)
 
 if __name__ == "__main__":
