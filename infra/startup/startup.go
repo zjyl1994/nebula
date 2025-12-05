@@ -1,10 +1,12 @@
 package startup
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 
 	"example.com/template/infra/util"
+	"example.com/template/infra/util/figlet"
 	"example.com/template/infra/vars"
 	"example.com/template/server"
 	"github.com/iancoleman/strcase"
@@ -22,6 +24,10 @@ func Startup() (err error) {
 	if vars.DEBUG_MODE {
 		logrus.SetLevel(logrus.DebugLevel)
 		logrus.Debugln("Debug mode enabled")
+	} else {
+		if banner, e := figlet.Render(vars.APP_NAME); e == nil {
+			fmt.Println(banner)
+		}
 	}
 
 	databaseFile := strcase.ToSnake(vars.APP_NAME) + ".db"
