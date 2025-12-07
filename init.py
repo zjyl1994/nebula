@@ -68,6 +68,21 @@ def main():
             replace_in_file(p, "APP_NAME_PLACEHOLDER", app_name)
         else:
             print(f"missing {p}", file=sys.stderr)
+    try:
+        gitignore = (root / ".gitignore")
+        content = gitignore.read_text(encoding="utf-8") if gitignore.exists() else ""
+    except Exception:
+        content = ""
+    patterns = [app_name, "webui/dist"]
+    missing = []
+    for pat in patterns:
+        if not re.search(rf"(?m)^\s*{re.escape(pat)}\s*$", content):
+            missing.append(pat)
+    if missing:
+        if content and not content.endswith("\n"):
+            content += "\n"
+        content += "\n".join(missing) + "\n"
+        (root / ".gitignore").write_text(content, encoding="utf-8")
     mod = get_module_path()
     if mod:
         replace_go_imports(root, "example.com/template", mod)
